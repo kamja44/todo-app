@@ -1,32 +1,31 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-/*
+interface IForm {
+  toDo: string;
+}
 function ToDoList() {
-  const [toDo, setToDo] = useState("");
-  const [toDoError, setToDoError] = useState("");
-  const onChange = (event: React.FormEvent<HTMLInputElement>) => {
-    const {
-      currentTarget: { value },
-    } = event;
-    setToDoError("");
-    setToDo(value);
-  };
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (toDo.length < 10) {
-      return setToDoError("To do should be longer");
-    }
+  const { register, handleSubmit, setValue } = useForm<IForm>();
+  const onSubmit = (data: IForm) => {
+    console.log("add to do ", data.toDo); // input의 이름이 그대로 data에 들어감
+    setValue("toDo", "");
   };
   return (
     <div>
-      <form onSubmit={onSubmit}>
-        <input onChange={onChange} value={toDo} placeholder="Write a to do" />
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <input
+          {...register("toDo", {
+            required: "Write TODO",
+          })}
+          placeholder="Write a to do"
+        />
         <button>Add</button>
-        {toDoError !== "" ? toDoError : null}
       </form>
     </div>
   );
 }
-   */
+export default ToDoList;
+
+/*
 interface IForm {
   Email: string;
   FirstName: string;
@@ -34,6 +33,7 @@ interface IForm {
   Username: string;
   Password: string;
   Password1: string;
+  extraError: string;
 }
 
 function ToDoList() {
@@ -41,13 +41,23 @@ function ToDoList() {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
   } = useForm<IForm>({
     defaultValues: {
       Email: "@naver.com",
     },
   });
-  const onValid = (data: any) => {
-    console.log(data);
+  const onValid = (data: IForm) => {
+    if (data.Password !== data.Password1) {
+      setError(
+        "Password1",
+        {
+          message: "Password are not the same",
+        },
+        { shouldFocus: true }
+      );
+    }
+    setError("extraError", { message: "Server offline" });
   };
   console.log(errors);
   return (
@@ -68,7 +78,10 @@ function ToDoList() {
         />
         <span>{errors?.Email?.message}</span>
         <input
-          {...register("FirstName", { required: "FirstName is Required" })}
+          {...register("FirstName", {
+            required: "FirstName is Required",
+            // validate: (value) => !value.includes("nico"),
+          })}
           placeholder="FirstName"
         />
         <span>{errors?.FirstName?.message}</span>
@@ -105,8 +118,10 @@ function ToDoList() {
         />
         <span>{errors?.Password1?.message}</span>
         <button>Add</button>
+        <span>{errors?.extraError?.message}</span>
       </form>
     </div>
   );
 }
 export default ToDoList;
+ */
