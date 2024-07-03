@@ -1,16 +1,40 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import {
+  atom,
+  useRecoilState,
+  useRecoilValue,
+  useSetRecoilState,
+} from "recoil";
+
 interface IForm {
   toDo: string;
 }
+interface IToDo {
+  text: string;
+  category: "TODO" | "DOING" | "DONE";
+  id: number;
+}
+const toDoState = atom<IToDo[]>({
+  key: "toDo",
+  default: [],
+});
+
 function ToDoList() {
+  const [toDos, setToDos] = useRecoilState(toDoState); //value = get, modFn = set
+
   const { register, handleSubmit, setValue } = useForm<IForm>();
-  const onSubmit = (data: IForm) => {
-    console.log("add to do ", data.toDo); // input의 이름이 그대로 data에 들어감
+  const onSubmit = ({ toDo }: IForm) => {
+    setToDos((prev) => [
+      { text: toDo, category: "TODO", id: Date.now() },
+      ...prev,
+    ]);
     setValue("toDo", "");
   };
+
   return (
     <div>
+      <h1>To Dos</h1>
+      <hr />
       <form onSubmit={handleSubmit(onSubmit)}>
         <input
           {...register("toDo", {
@@ -20,6 +44,11 @@ function ToDoList() {
         />
         <button>Add</button>
       </form>
+      <ul>
+        {toDos.map((toDo) => (
+          <li key={toDo.id}>{toDo.text}</li>
+        ))}
+      </ul>
     </div>
   );
 }
