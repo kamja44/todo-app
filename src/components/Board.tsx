@@ -1,6 +1,7 @@
 import { Droppable } from "react-beautiful-dnd";
 import DraggableCard from "./DraggableCard";
 import styled from "styled-components";
+import { useRef } from "react";
 
 const Wrapper = styled.div`
   padding: 10px 0px;
@@ -36,10 +37,24 @@ interface IBoardProps {
   toDos: string[];
   boardId: string;
 }
+interface IForm {
+  toDo: string;
+}
+
 function Board({ toDos, boardId }: IBoardProps) {
+  const inputRef = useRef<HTMLInputElement>(null); // input 태그를 받아오는 것과 동일한 역할 즉, HTML 태그 자체를 조작한다고 생각하면됨
+  // 즉, inputRef = document.getElementById(input)
+  const onClick = () => {
+    inputRef.current?.focus();
+    setTimeout(() => {
+      inputRef.current?.blur();
+    });
+  };
   return (
     <Wrapper>
       <Title>{boardId}</Title>
+      <input ref={inputRef} placeholder="grab me" />
+      <button onClick={onClick}>Click me</button>
       <Droppable droppableId={boardId}>
         {(provided, snapshot) => (
           <Area
