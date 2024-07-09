@@ -2,6 +2,9 @@ import { Droppable } from "react-beautiful-dnd";
 import DraggableCard from "./DraggableCard";
 import styled from "styled-components";
 import { useRef } from "react";
+import { useForm } from "react-hook-form";
+import { ITodo, toDoState } from "../atom";
+import { useSetRecoilState } from "recoil";
 
 const Wrapper = styled.div`
   padding: 10px 0px;
@@ -33,8 +36,14 @@ const Area = styled.div<IAreaProps>`
   flex-grow: 1;
   transition: background-color 0.3s ease-in-out;
 `;
+const Form = styled.form`
+  width: 100%;
+  input {
+    width: 100%;
+  }
+`;
 interface IBoardProps {
-  toDos: string[];
+  toDos: ITodo[];
   boardId: string;
 }
 interface IForm {
@@ -42,19 +51,31 @@ interface IForm {
 }
 
 function Board({ toDos, boardId }: IBoardProps) {
-  const inputRef = useRef<HTMLInputElement>(null); // input 태그를 받아오는 것과 동일한 역할 즉, HTML 태그 자체를 조작한다고 생각하면됨
-  // 즉, inputRef = document.getElementById(input)
-  const onClick = () => {
-    inputRef.current?.focus();
-    setTimeout(() => {
-      inputRef.current?.blur();
+  const setToDos = useSetRecoilState(toDoState);
+  const { register, setValue, handleSubmit } = useForm<IForm>();
+  const onValid = ({ toDo }: IForm) => {
+    const newToDo = {
+      id: Date.now(),
+      text: toDo,
+    };
+    setToDos((allBoards) => {
+      return {
+        ...allBoards,
+        [boardId]: [newToDo, ...allBoards[boardId]],
+      };
     });
+    setValue("toDo", "");
   };
   return (
     <Wrapper>
       <Title>{boardId}</Title>
-      <input ref={inputRef} placeholder="grab me" />
-      <button onClick={onClick}>Click me</button>
+      <Form onSubmit={handleSubmit(onValid)}>
+        <input
+          {...register("toDo", { required: true })}
+          type="text"
+          placeholder={`Add task on ${boardId}`}
+        />
+      </Form>
       <Droppable droppableId={boardId}>
         {(provided, snapshot) => (
           <Area
@@ -64,7 +85,12 @@ function Board({ toDos, boardId }: IBoardProps) {
             {...provided.droppableProps}
           >
             {toDos.map((toDo, index) => (
-              <DraggableCard toDo={toDo} index={index} key={toDo} />
+              <DraggableCard
+                toDoText={toDo.text}
+                toDoId={toDo.id}
+                index={index}
+                key={toDo.id}
+              />
             ))}
             {provided.placeholder}
           </Area>
