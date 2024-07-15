@@ -5,14 +5,17 @@ import styled from "styled-components";
 import { useRecoilState } from "recoil";
 import { toDoState } from "./atom";
 import Board from "./components/Board";
+import { useForm } from "react-hook-form";
 const Wrapper = styled.div`
   display: flex;
+  flex-direction: column;
   max-width: 680px;
   width: 100%;
   margin: 0 auto;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 70vh;
+  margin-bottom: 10vh;
 `;
 const Boards = styled.div`
   display: grid;
@@ -20,9 +23,30 @@ const Boards = styled.div`
   gap: 10px;
   grid-template-columns: repeat(3, 1fr);
 `;
+const AddForm = styled.div`
+  margin-bottom: 10px;
+  display: flex;
+  /* width: 920px; */
+  height: 30vh;
+  justify-content: center;
+  align-items: end;
+`;
+interface IForm {
+  addToDo: string;
+}
 
 function App() {
   const [toDos, setToDos] = useRecoilState(toDoState);
+  const { register, handleSubmit, setValue } = useForm<IForm>();
+  const onValid = ({ addToDo }: IForm) => {
+    setToDos((allBoards) => {
+      return {
+        ...allBoards,
+        [addToDo]: [],
+      };
+    });
+    setValue("addToDo", "");
+  };
   console.log(`처음 ${JSON.stringify(toDos)}`);
   console.log(Object.keys(toDos));
   console.log(`처음${typeof Object.keys(toDos)}`);
@@ -62,6 +86,18 @@ function App() {
       <GlobalStyle />
       <DragDropContext onDragEnd={onDragEnd}>
         <Wrapper>
+          <AddForm>
+            <form onSubmit={handleSubmit(onValid)}>
+              <input
+                type="text"
+                {...register("addToDo", {
+                  required: true,
+                })}
+                placeholder={`CREATE NEW BOARD`}
+              />
+              <button>CREATE</button>
+            </form>
+          </AddForm>
           <Boards>
             {Object.keys(toDos).map((boardId) => (
               <Board boardId={boardId} key={boardId} toDos={toDos[boardId]} />
