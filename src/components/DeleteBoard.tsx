@@ -6,7 +6,6 @@ interface IAreaProps {
   isDraggingFromThis: boolean;
 }
 interface IBoardProps {
-  toDos?: ITodo[];
   boardId: string;
 }
 const Area = styled.div<IAreaProps>`
@@ -25,7 +24,7 @@ const Area = styled.div<IAreaProps>`
     font-weight: 600;
   }
 `;
-const DeleteBoard = ({ toDos, boardId }: IBoardProps) => {
+const DeleteBoard = ({ boardId }: IBoardProps) => {
   return (
     <>
       <Droppable droppableId={boardId} type="BOARD">
